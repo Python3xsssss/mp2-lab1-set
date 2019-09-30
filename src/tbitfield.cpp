@@ -11,6 +11,8 @@ const int TELEM_BIT_SIZE = sizeof(TELEM) * 8;
 
 TBitField::TBitField(int len)
 {
+	if (len < 0)
+		throw "Error: illegal length";
 	BitLen = len;
 	MemLen = (BitLen - 1) / TELEM_BIT_SIZE + 1;
 	pMem = new TELEM[MemLen];
@@ -35,11 +37,15 @@ TBitField::~TBitField()
 
 int TBitField::GetMemIndex(const int n) const // индекс Мем для бита n
 {
+	if ((n > BitLen) || (n < 0))
+		throw "Error: illegal n";
 	return n / TELEM_BIT_SIZE;
 }
 
 TELEM TBitField::GetMemMask(const int n) const // битовая маска для бита n
 {
+	if ((n > BitLen) || (n < 0))
+		throw "Error: illegal n";
 	return 1 << (n % TELEM_BIT_SIZE);
 }
 
@@ -109,9 +115,21 @@ int TBitField::operator!=(const TBitField &bf) const // сравнение
 
 TBitField TBitField::operator|(const TBitField &bf) // операция "или"
 {
-	TBitField tmp(BitLen);
+	int blen, mlen;
+	if (BitLen < bf.BitLen)
+	{
+		blen = bf.BitLen;
+		mlen = bf.MemLen;
+	}
+	else
+	{
+		blen = BitLen;
+		mlen = MemLen;
+	}
 
-	for (int i = 0; i < MemLen; i++)
+	TBitField tmp(blen);
+
+	for (int i = 0; i < mlen; i++)
 		tmp.pMem[i] = pMem[i] | bf.pMem[i];
 
 	return tmp;
@@ -119,9 +137,21 @@ TBitField TBitField::operator|(const TBitField &bf) // операция "или"
 
 TBitField TBitField::operator&(const TBitField &bf) // операция "и"
 {
-	TBitField tmp(BitLen);
+	int blen, mlen;
+	if (BitLen < bf.BitLen)
+	{
+		blen = bf.BitLen;
+		mlen = bf.MemLen;
+	}
+	else
+	{
+		blen = BitLen;
+		mlen = MemLen;
+	}
+		
+	TBitField tmp(blen);
 
-	for (int i = 0; i < MemLen; i++)
+	for (int i = 0; i < mlen; i++)
 		tmp.pMem[i] = pMem[i] & bf.pMem[i];
 
 	return tmp;
